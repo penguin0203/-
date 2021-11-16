@@ -1,5 +1,6 @@
 import sys, pygame
 import numpy
+import math
 #initialize the pygame
 pygame.init()
 
@@ -7,6 +8,10 @@ pygame.init()
 size = width, height = 800, 800
 black = 0, 0, 0
 green = 0,255,0
+head = 1
+tail = 0
+#文字を入力できるようにするため
+A,B,C,D,E,F,G,H = "A","B","C","D","E","F","G","H"
 
 screen = pygame.display.set_mode(size)
 
@@ -33,11 +38,38 @@ bottom_dot = [(i, height * 0.9) for i in numpy.arange(board_left + board_width/7
 left_dot = [(width * 0.1, i) for i in numpy.arange(board_top+board_height/7, board_bottom + board_height/7, board_height/7)]
 right_dot = [(height * 0.9, i) for i in numpy.arange(board_top + board_height/7, board_bottom+ board_height/7, board_height/7)]
 
-print(right_dot)
 
+
+#駒を作る
+#場所を受けてその位置を中心に駒を置く
+#listのpygameを受ける
+#side, headかtailか
+def draw_piece(place, side):
+    #表、白
+    if (side == head):
+        pygame.draw.circle(screen, (255,255,255), place, ((board_width/16)))
+    #裏、黒
+    if (side == tail):
+        pygame.draw.circle(screen, black, place, ((board_width/16)))
+        
 def draw_lines(color, place, v1,v2):
     for i in range(0, len(v1)):
         pygame.draw.aaline(place, color,v1[i], v2[i])
+
+#横にA~H縦に1~8
+#A,8などを入力するとそれに対するますの横軸縦軸を返す
+def get_coord(alpha, num):
+    alpha_num = ord(alpha)-64
+    return((alpha_num*board_width/7, num * board_height/7), (alpha_num*(board_width/7) + board_width/7, num * (board_height/7) + board_height/7))
+
+#軸入力に対してA,8などを返す
+def get_place(*v):
+    return(math.floor(v[0]/(board_height/7)), chr(math.floor(v[1]/(board_height/7)) +64))
+
+#ますを入力するとその中心を返す,駒を置くため
+def get_mid(*v):
+    ver, hori = get_coord(v[0], v[1])
+    return((ver[0]+ board_height/14), (ver[1]+ board_width/14))
 
 def board():
     #四角を表示
@@ -57,6 +89,7 @@ while 1:
         if event.type == pygame.QUIT: sys.exit()
     
     
-    #スクリーンの色(RGB
+    #スクリーンの色(RGB)
     board()
+    draw_piece(get_mid(B, 8), 1)
     pygame.display.update()
