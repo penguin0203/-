@@ -23,3 +23,17 @@ while 1:
     screen.fill(black)
     screen.blit(ball, ballrect)
     pygame.display.flip()
+    
+def back(a,b,c):
+    if a == 0 and b == 0 and c == 0:
+            print("end")
+            return 0
+    if a != 0:
+            print(a)
+            return back(a - 1,b,c)
+    if b != 0:
+            print(b)
+            return back(a,b - 1,c)
+    if c != 0:
+        print(c)
+        return back(a,b,c - 1)

@@ -1,6 +1,7 @@
 import sys, pygame
 import numpy
 import math
+import condition
 #initialize the pygame
 pygame.init()
 
@@ -108,23 +109,26 @@ def set_list():
     global turn
     global position
     mouse_coord = get_place(get_mouse_coord())
-    if (turn % 2 == 1):
-        mouse_coord.append(0)
-        position.append(mouse_coord)
-    else:
-        mouse_coord.append(1)
-        position.append(mouse_coord)
-    turn += 1
-        
+    if condition.place_check(mouse_coord, position):
+        #向きも必要なので加える
+        mouse_coord.append((turn%2+1)%2)
+        if len(condition.reverse_list(mouse_coord, position)) != 0:
+            position.append(mouse_coord)
+            print(position)
+            convert(condition.reverse_list(mouse_coord, position))
+            
+            turn += 1
+
+#リストで完全一致を探してそれの末尾を1なら0に0なら１に変換する
+def convert(changing_list):
+    for i in position:
+        if i in changing_list:
+            i[2] = (i[2] + 1) %2
+    
+    
 def initiate():
     global position
     position = initial_position
-
-#制約
-#一度置いたますの上にはおけないように
-def place_check():
-    pass
-    
 
 #title
 pygame.display.set_caption("オセロ")
