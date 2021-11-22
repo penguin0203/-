@@ -179,7 +179,6 @@ def reverse_list(input, list):
             break
         else:
             break
-    print(output_list)
     return (output_list)
 
 

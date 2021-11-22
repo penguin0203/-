@@ -2,6 +2,7 @@ import sys, pygame
 import numpy
 import math
 import condition
+import copy
 #initialize the pygame
 pygame.init()
 
@@ -9,7 +10,9 @@ pygame.init()
 size = width, height = 800, 800
 black = 0, 0, 0
 green = 0,255,0
+#白
 head = 1
+#黒
 tail = 0
 
 #ターン
@@ -20,6 +23,9 @@ A,B,C,D,E,F,G,H = "A","B","C","D","E","F","G","H"
 #開始盤面
 #リストのリストで統一
 initial_position = [[D,4,1],[E,4,0], [D,5,0],[E,5,1]]
+
+#開始の設定が完了したかどうか
+initiate_flag = False
 
 #局面
 position = []
@@ -105,19 +111,31 @@ def get_mouse_coord():
 #リストの中身を書く
 #初めはinitialからスタートする
 #ターンを作る
-def set_list():
+def set_list(input):
     global turn
     global position
-    mouse_coord = get_place(get_mouse_coord())
-    if condition.place_check(mouse_coord, position):
-        #向きも必要なので加える
-        mouse_coord.append((turn%2+1)%2)
-        if len(condition.reverse_list(mouse_coord, position)) != 0:
-            position.append(mouse_coord)
-            print(position)
-            convert(condition.reverse_list(mouse_coord, position))
-            
-            turn += 1
+    end_flag = False
+    mouse_coord = input
+    #白と黒をターンによって追加
+    mouse_coord.append(turn%2)
+    if len(possible_hands(position, turn)) == 0:
+        print("pass")
+        end_flag = True
+        turn += 1
+    #おけるかどうかを確認
+    if mouse_coord in possible_hands(position, turn):
+        end_flag = False
+        position.append(mouse_coord)
+        convert(condition.reverse_list(mouse_coord, position))
+        turn += 1
+    if end_flag == True:
+        print("end")
+        print(piece_count(position))
+
+#駒の数を数える
+#白,黒
+def piece_count(list):
+    return sum([i[2] == 1 for i in list]), len(list) - sum([i[2] == 1 for i in list])
 
 #リストで完全一致を探してそれの末尾を1なら0に0なら１に変換する
 def convert(changing_list):
@@ -125,10 +143,29 @@ def convert(changing_list):
         if i in changing_list:
             i[2] = (i[2] + 1) %2
     
-    
+#開始局面
 def initiate():
     global position
-    position = initial_position
+    global initiate_flag
+    if initiate_flag == False:
+        position = copy.copy(initial_position)
+        initiate_flag = True
+
+#勝敗判定
+#パス判定
+#周りの駒を全て調べて着手できなかった場合 or 全ての空いているますを調べて着手できなかった場合
+#全てのますに対して
+def possible_hands(position, turn):
+    possible_position = []
+    #駒が置かれていなくてかつreverse_listのlenが1以上のもの場所
+    for i in range(ord(A), ord("I")):
+        for j in range(1, 9):
+            if condition.place_check((chr(i), j), position) == True and len(condition.reverse_list([chr(i), j, turn%2], position)) != 0:
+                possible_position.append([chr(i), j, turn%2])
+    return possible_position
+
+
+
 
 #title
 pygame.display.set_caption("オセロ")
@@ -141,10 +178,10 @@ while 1:
     if turn == 0:
         initiate()
     if (pygame.mouse.get_pressed()[0]== True):
-        set_list()
+        set_list(get_place(get_mouse_coord()))
+        
     
     #スクリーンの色(RGB)
     board()
     draw_piece(position)
-    draw_piece(((B, 8, 1),))
     pygame.display.update()
