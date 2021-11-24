@@ -3,6 +3,7 @@ import numpy
 import math
 import condition
 import copy
+import numpy as np
 #initialize the pygame
 pygame.init()
 
@@ -10,10 +11,16 @@ pygame.init()
 size = width, height = 800, 800
 black = 0, 0, 0
 green = 0,255,0
+
+#色
 #白
 head = 1
 #黒
 tail = 0
+
+#とってきた色たち
+color = [(245,245,198), (125,168,123),(50,103,101),(39,37,61),]
+text_color = [(33,33,33),(117,117,117),(189,189,189),(0,0,0)]
 
 #ターン
 turn = 0
@@ -26,6 +33,8 @@ initial_position = [[D,4,1],[E,4,0], [D,5,0],[E,5,1]]
 
 #開始の設定が完了したかどうか
 initiate_flag = False
+
+
 
 #局面
 position = []
@@ -54,6 +63,34 @@ bottom_dot = [(i, height * 0.9) for i in numpy.arange(board_left + board_width/7
 #横線
 left_dot = [(width * 0.1, i) for i in numpy.arange(board_top+board_height/7, board_bottom + board_height/7, board_height/7)]
 right_dot = [(height * 0.9, i) for i in numpy.arange(board_top + board_height/7, board_bottom+ board_height/7, board_height/7)]
+
+
+#メニューの設定
+#AIと戦う
+#1V1をする
+#やめる
+#スクリーンの中心に長さの中心を合わせる
+def find_screen_mid(screen_length, length):
+    return (screen_length/2) - (length/2), (screen_length/2) + (length/2)
+
+#横の高さを求める
+def find_menu_height(screen_height, margin_height, padding_height, menu_num):
+    menu_height = (screen_height - (margin_height * 2 + padding_height * (menu_num +1))) / menu_num
+    start_output_list = [i for i in np.arange(margin_height+padding_height, screen_height -  margin_height, padding_height+menu_height)]
+    end_output_list = list(map(lambda num: num + menu_height, start_output_list))
+    output_list = [[start_output_list[i], end_output_list[i]] for i in range(len(start_output_list))]
+    return output_list, start_output_list, menu_height
+
+#pygame用の長さに合わせる
+#left,top,width,height
+def for_rect_in_pygame(screen_length, screen_height, length, margin_height, padding_height, menu_num):
+    left = find_screen_mid(screen_length, length)[0]
+    width = length
+    top = find_menu_height(screen_height, margin_height, padding_height, menu_num)[1]
+    height = find_menu_height(screen_height, margin_height, padding_height, menu_num)[2]
+    output = [[left, i, width, height] for i in top]
+    return (output)
+
 
 
 
@@ -164,24 +201,56 @@ def possible_hands(position, turn):
                 possible_position.append([chr(i), j, turn%2])
     return possible_position
 
+#font設定
+texts = ["1 VS 1", "VS AI", "QUIT"]
+font_size = math.floor(250/len(texts))
+Zen_Kurenaido = pygame.font.SysFont('Zen_Kurenaido',font_size)
 
+
+def play_reverse():
+    if turn == 0:
+        initiate()
+    if (pygame.mouse.get_pressed()[0]== True):
+        set_list(get_place(get_mouse_coord()))
+    #スクリーンの色(RGB)
+    board()
+    draw_piece(position)
 
 
 #title
 pygame.display.set_caption("オセロ")
 
+#left,top,width,height
+def is_inside(mouse_coord, list):
+    if list[0] < mouse_coord[0] < list[0] + list[2] and list[1] < mouse_coord[1] < list[1] + list[3]:
+        return True
+    return False
+
+
+    
+
 #gameループ
 while 1:
     for event in pygame.event.get():
         if event.type == pygame.QUIT: sys.exit()
+    #メニュー画面を作る
+    #普通に1v1とvaiを作る
+    screen.fill(color[1])
+
+    mouse = pygame.mouse.get_pos()
+    box_list =  for_rect_in_pygame(width, height, width/2, height * 0.2, height*0.05, len(texts))
     
-    if turn == 0:
-        initiate()
-    if (pygame.mouse.get_pressed()[0]== True):
-        set_list(get_place(get_mouse_coord()))
+    for i in range(0, len(texts)):
+        pygame.draw.rect(screen, color[0],box_list[i])
+        screen.blit(Zen_Kurenaido.render(texts[i], True, text_color[1]) , (find_screen_mid(width, len(texts[i]) * font_size/2)[0], find_menu_height(height, height*0.2, height*0.05, len(texts))[1][i]))
+    for i in box_list:
+        if is_inside(mouse, i):
+            #マウスが置かれている状態での色かえ
+            pygame.draw.rect(screen, color[2],i)
+            for i in range(0, len(texts)):
+                screen.blit(Zen_Kurenaido.render(texts[i], True, text_color[1]) , (find_screen_mid(width, len(texts[i]) * font_size/2)[0], find_menu_height(height, height*0.2, height*0.05, len(texts))[1][i]))
         
     
-    #スクリーンの色(RGB)
-    board()
-    draw_piece(position)
+    
+    
     pygame.display.update()

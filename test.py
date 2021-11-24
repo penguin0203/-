@@ -1,39 +1,73 @@
-import sys, pygame
+import pygame
+import sys
+
+
+# initializing the constructor
 pygame.init()
 
-size = width, height = 320, 240
-speed = [2, 2]
-black = 0, 0, 0
+# screen resolution
+res = (720,720)
 
-screen = pygame.display.set_mode(size)
+# opens up a window
+screen = pygame.display.set_mode(res)
 
-ball = pygame.image.load("intro_ball.gif")
-ballrect = ball.get_rect()
+# white color
+color = (255,255,255)
 
-while 1:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT: sys.exit()
+# light shade of the button
+color_light = (170,170,170)
 
-    ballrect = ballrect.move(speed)
-    if ballrect.left < 0 or ballrect.right > width:
-        speed[0] = -speed[0]
-    if ballrect.top < 0 or ballrect.bottom > height:
-        speed[1] = -speed[1]
+# dark shade of the button
+color_dark = (100,100,100)
 
-    screen.fill(black)
-    screen.blit(ball, ballrect)
-    pygame.display.flip()
+# stores the width of the
+# screen into a variable
+width = screen.get_width()
+
+# stores the height of the
+# screen into a variable
+height = screen.get_height()
+
+# defining a font
+smallfont = pygame.font.SysFont('Corbel',35)
+
+# rendering a text written in
+# this font
+text = smallfont.render('quit' , True , color)
+
+while True:
+	
+	for ev in pygame.event.get():
+		
+		if ev.type == pygame.QUIT:
+			pygame.quit()
+			
+		#checks if a mouse is clicked
+		if ev.type == pygame.MOUSEBUTTONDOWN:
+			
+			#if the mouse is clicked on the
+			# button the game is terminated
+			if width/2 <= mouse[0] <= width/2+140 and height/2 <= mouse[1] <= height/2+40:
+				pygame.quit()
+				
+	# fills the screen with a color
+	screen.fill((60,25,60))
+	pygame.font.get_fonts
+	# stores the (x,y) coordinates into
+	# the variable as a tuple
+	mouse = pygame.mouse.get_pos()
+	
+	# if mouse is hovered on a button it
+	# changes to lighter shade
+	if width/2 <= mouse[0] <= width/2+140 and height/2 <= mouse[1] <= height/2+40:
+		pygame.draw.rect(screen,color_light,[width/2,height/2,140,40])
+		
+	else:
+		pygame.draw.rect(screen,color_dark,[width/2,height/2,140,40])
+	print(pygame.font.get_fonts())
+	# superimposing the text onto our button
+	screen.blit(text , (width/2+50,height/2))
+	# updates the frames of the game
+	pygame.display.update()
+
     
-def back(a,b,c):
-    if a == 0 and b == 0 and c == 0:
-            print("end")
-            return 0
-    if a != 0:
-            print(a)
-            return back(a - 1,b,c)
-    if b != 0:
-            print(b)
-            return back(a,b - 1,c)
-    if c != 0:
-        print(c)
-        return back(a,b,c - 1)
